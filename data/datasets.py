@@ -115,13 +115,13 @@ class SpuriousDataset(Dataset):
             elif os.path.exists(os.path.join(self.basedir, "waterbird_complete95_forest2water2", "metadata.csv")):
                 generate_metadata("waterbirds", self.basedir, metadata_path)
             else:
-            raise FileNotFoundError(
-                f"Metadata file not found: {metadata_path}\n"
+                raise FileNotFoundError(
+                    f"Metadata file not found: {metadata_path}\n"
                     f"Could not auto-generate metadata. Please ensure:\n"
                     f"  - For CelebA: list_attr_celeba.txt and list_eval_partition.txt exist\n"
                     f"  - For Waterbirds: waterbird_complete95_forest2water2/metadata.csv exists\n"
                     f"  - Or manually create metadata.csv with columns: id,filename,split,y,a"
-            )
+                )
         
         metadata_df = pd.read_csv(metadata_path)
         metadata_df = metadata_df[metadata_df["split"] == split_i]

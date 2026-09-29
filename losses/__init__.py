@@ -34,28 +34,7 @@ def weighted_cross_entropy(logits, y, weights):
     return out.sum()
 
 
-def rebalance_weights(weights, targets):
-    """
-    Rebalance weights by class.
-    
-    For each class, multiply weights by len(targets) / class_count to balance
-    the class distribution in the weights.
-    
-    Args:
-        weights: Tensor of shape (n,) with per-example weights
-        targets: Tensor of shape (n,) with class labels
-    
-    Returns:
-        weights: Rebalanced weights (detached)
-    """
-    unique_classes = torch.unique(targets)
-    for c in unique_classes:
-        class_count = (targets == c).sum()
-        weights[targets == c] *= len(targets) / class_count
-    return weights.detach()
-
-
-def get_marla_weights(logits, y, gamma, rebalance=False):
+def get_marla_weights(logits, y, gamma):
     """
     Compute MARLA weights based on prediction confidence.
     
@@ -69,7 +48,6 @@ def get_marla_weights(logits, y, gamma, rebalance=False):
         logits: Tensor of shape (n, K) where K is number of classes
         y: Tensor of shape (n,) with class labels
         gamma: Reweighting strength parameter (gamma > 0)
-        rebalance: If True, rebalance weights by class before normalizing
     
     Returns:
         weights: Tensor of shape (n,) with normalized weights
@@ -85,10 +63,6 @@ def get_marla_weights(logits, y, gamma, rebalance=False):
     log_weights = log_weights - log_weights.max()
     weights = log_weights.exp()
     weights = weights / weights.sum()
-    
-    if rebalance:
-        weights = rebalance_weights(weights, y)
-        weights = weights / weights.sum()
     
     # Check for NaN or Inf in weights
     if torch.isnan(weights).any() or torch.isinf(weights).any():

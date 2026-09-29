@@ -31,7 +31,6 @@ from marla.models import MARLAModel
 from marla.models.architectures import get_model, get_classifier_and_feature_extractor
 from marla.losses import (
     get_marla_weights,
-    rebalance_weights,
     compute_spectral_decomposition,
     marla_loss,
     erm_loss,
@@ -537,8 +536,8 @@ def initialize_model(args, train_embeddings, train_labels, device):
         with torch.no_grad():
             init_logits = F.linear(train_embeddings, base_weight, base_bias)
         
-        # Compute MARLA weights (with rebalance=True)
-        weights = get_marla_weights(init_logits, train_labels, gamma=args.gamma, rebalance=True)
+        # Compute MARLA weights
+        weights = get_marla_weights(init_logits, train_labels, gamma=args.gamma)
         
         # Compute spectral decomposition
         print(f"Computing spectral decomposition with rank={args.spectral_rank}...")
@@ -730,7 +729,7 @@ def main():
         # Use the same base weights/bias that were used for reweighting
         with torch.no_grad():
             train_init_logits = F.linear(train_emb_split, model.base_weight, model.base_bias)
-        train_weights = get_marla_weights(train_init_logits, train_y_split, gamma=args.gamma, rebalance=True)
+        train_weights = get_marla_weights(train_init_logits, train_y_split, gamma=args.gamma)
         train_weights = train_weights.to(device)
         
         # Use training split for actual training
